@@ -1,7 +1,79 @@
 {% extends "layout.html" %}
-{% block page_title %}Public Page{% endblock %}
+{% block page_title %}Espace Public{% endblock %}
 {% block body %}
     {{ super() }}
-    <img src="{{ url_for('static', filename='img/public.jpg') }}" class="img-circle" alt="Cinque Terre" width="304" height="236">
-    You can access this no matter whether you have logged in.
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Bienvenue dans l'espace public</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="media">
+                        <div class="media-left">
+                            <img src="{{ url_for('static', filename='img/public.jpg') }}" class="img-circle media-object" alt="Image publique" width="150" height="150">
+                        </div>
+                        <div class="media-body">
+                            <h4 class="media-heading">Accès libre</h4>
+                            <p class="lead">Vous pouvez accéder à cette page que vous soyez connecté ou non.</p>
+                            <p>Cette zone est accessible à tous les visiteurs et contient des informations générales sur notre application. Explorez librement et découvrez les fonctionnalités de base.</p>
+                            <p>Pour accéder à des fonctionnalités supplémentaires et personnalisées, veuillez vous connecter.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="well">
+                <h4><span class="glyphicon glyphicon-info-sign"></span> À savoir</h4>
+                <p>Les pages publiques sont conçues pour permettre à tous les utilisateurs d'explorer les fonctionnalités de base de l'application.</p>
+                <hr>
+                <h4><span class="glyphicon glyphicon-question-sign"></span> Besoin d'aide ?</h4>
+                <p>Si vous avez des questions, n'hésitez pas à consulter notre section d'aide ou à nous contacter.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-success">
+                <span class="glyphicon glyphicon-check"></span>
+                <strong>Conseil :</strong> Connectez-vous pour découvrir les fonctionnalités avancées et réservées aux membres.
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .panel {
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.1);
+        }
+        .media-object {
+            border: 3px solid #5bc0de;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .media-object:hover {
+            transform: scale(1.05);
+            border-color: #337ab7;
+        }
+        .well {
+            border-radius: 3px;
+        }
+        .btn-primary {
+            margin-top: 10px;
+        }
+        .glyphicon {
+            margin-right: 5px;
+        }
+        .alert-success {
+            margin-top: 20px;
+        }
+        .lead {
+            font-weight: 400;
+            color: #337ab7;
+        }
+    </style>
 {% endblock %}
