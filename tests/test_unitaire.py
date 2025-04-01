@@ -22,6 +22,12 @@ class TestVerify(unittest.TestCase):
         # Fermer la connexion à la base de données
         self.conn.close()
 
+    '''
+        Test Unitaire pour la fonction database.verify :
+                    -> MDP OK
+                    -> MDP NOK
+                    -> MDP NC
+    '''
     def test_verify_correct_password(self):
         # Appeler la fonction avec des identifiants corrects
         result = verify('ADMIN', 'admin')
