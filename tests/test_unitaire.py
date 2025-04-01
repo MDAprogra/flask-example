@@ -51,6 +51,11 @@ class TestVerify(unittest.TestCase):
             result = False
         self.assertFalse(result)
 
+        '''
+        Test Unitaire pour la fonction database.delete_user_from_db :
+        -> USER OK
+        -> USER NOK
+        '''
     def test_delete_user_exist(self):
         result = delete_user_from_db("TEST")
         self.assertFalse(result)
