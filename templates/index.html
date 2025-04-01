@@ -1,20 +1,108 @@
 {% extends "layout.html" %}
-{% block page_title %}Welcome{% endblock %}
+{% block page_title %}Bienvenue sur Flask Example{% endblock %}
 {% block body %}
     {{ super() }}
 
-    <p>This is a minimal web app developed with <a href="http://flask.pocoo.org/">Flask</a> framework.</p>
-    <p>The main purpose is to introduce how to implement the essential elements in web applications with Flask, including</p>
-    <ul>
-        <li>URL Building</li>
-        <li>Authentication with Sessions</li>
-        <li>Template & Template Inheritance</li>
-        <li>Error Handling</li>
-        <li>Integrating with Bootstrap</li>
-        <li>Interaction with Database (SQLite)</li>
-        <li>Invoking static resources</li>
-        <li>Upload files</li>
-    </ul>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">À propos de cette application</h3>
+                </div>
+                <div class="panel-body">
+                    <p class="lead">Ceci est une application web minimaliste développée avec le framework <a href="http://flask.pocoo.org/" class="text-primary">Flask</a>.</p>
 
-    <p>For more basic knowledge of Flask, you can refer to <a href="https://www.tutorialspoint.com/flask/">a tutorial on Tutorialspoint</a>.</p>
+                    <p>Cette application a pour objectif principal de présenter comment implémenter les éléments essentiels des applications web avec Flask.</p>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <p>Pour plus d'informations sur Flask, vous pouvez consulter <a href="https://www.tutorialspoint.com/flask/" class="alert-link">ce tutoriel sur Tutorialspoint</a>.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Pour commencer</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Explorez les fonctionnalités en utilisant la barre de navigation ci-dessus.</p>
+                    <p>Connectez-vous pour accéder aux sections privées.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Fonctionnalités principales</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        {% set features = [
+                            {'icon': 'glyphicon-link', 'title': 'Construction d\'URL', 'desc': 'Création dynamique des liens'},
+                            {'icon': 'glyphicon-lock', 'title': 'Authentification avec Sessions', 'desc': 'Gestion des utilisateurs et permissions'},
+                            {'icon': 'glyphicon-file', 'title': 'Templates & Héritage', 'desc': 'Structuration du contenu avec Jinja2'},
+                            {'icon': 'glyphicon-warning-sign', 'title': 'Gestion d\'Erreurs', 'desc': 'Traitement des exceptions'},
+                            {'icon': 'glyphicon-th', 'title': 'Intégration Bootstrap', 'desc': 'Design responsive moderne'},
+                            {'icon': 'glyphicon-hdd', 'title': 'Base de Données SQLite', 'desc': 'Stockage et requêtes de données'},
+                            {'icon': 'glyphicon-picture', 'title': 'Ressources Statiques', 'desc': 'Chargement d\'images, CSS et JavaScript'},
+                            {'icon': 'glyphicon-upload', 'title': 'Téléchargement de Fichiers', 'desc': 'Gestion de formulaires et uploads'}
+                        ] %}
+
+                        {% for feature in features %}
+                            <div class="col-md-3 col-sm-6 feature-item">
+                                <div class="well">
+                                    <h4><span class="glyphicon {{ feature.icon }}" aria-hidden="true"></span> {{ feature.title }}</h4>
+                                    <p>{{ feature.desc }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .panel {
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.1);
+        }
+        .panel-heading {
+            font-weight: 600;
+        }
+        .lead {
+            font-size: 1.2em;
+            font-weight: 300;
+            color: #555;
+        }
+        .feature-item .well {
+            min-height: 150px;
+            transition: all 0.3s ease;
+        }
+        .feature-item .well:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #337ab7;
+        }
+        .feature-item h4 {
+            color: #337ab7;
+            margin-top: 0;
+        }
+        .feature-item .glyphicon {
+            margin-right: 8px;
+        }
+        .alert-info a {
+            text-decoration: underline;
+        }
+        @media (max-width: 992px) {
+            .feature-item .well {
+                min-height: 120px;
+            }
+        }
+    </style>
 {% endblock %}
