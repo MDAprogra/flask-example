@@ -1,7 +1,7 @@
 import unittest
 import sqlite3
 import hashlib
-from database import verify, user_db_file_location
+from database import verify, user_db_file_location, delete_user_from_db
 
 class TestVerify(unittest.TestCase):
 
@@ -51,7 +51,18 @@ class TestVerify(unittest.TestCase):
             result = False
         self.assertFalse(result)
 
-    
+    def test_delete_user_exist(self):
+        result = delete_user_from_db("TEST")
+        self.assertFalse(result)
+
+    def test_delete_user_not_exist(self):
+        result = None
+        try:
+            result = delete_user_from_db("TESTEUR")
+        except TypeError:
+            result = False
+        self.assertFalse(result)
+
 
 if __name__ == '__main__':
     unittest.main()
