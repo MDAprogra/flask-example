@@ -1,87 +1,149 @@
-
-<html>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.united.css') }}">
-<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-
-<title>Flask Example</title>
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.united.css') }}">
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <title>Flask Example</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 20px;
+    }
+    .navbar {
+        border-radius: 0;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      .navbar-brand {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .navbar-inverse .navbar-nav > li > a {
+        padding: 15px 20px;
+        transition: background-color 0.3s;
+      }
+      .navbar-inverse .navbar-nav > li > a:hover {
+        background-color: rgba(255,255,255,0.1);
+      }
+      .page-header {
+        border-bottom: 2px solid #eee;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+      }
+      .footer {
+        margin-top: 50px;
+        padding: 20px 0;
+        border-top: 1px solid #eee;
+        color: #777;
+        font-size: 0.9em;
+      }
+      .alert {
+        border-radius: 3px;
+        margin-bottom: 20px;
+      }
+      .btn {
+        border-radius: 3px;
+        font-weight: 500;
+      }
+      .form-control {
+        border-radius: 3px;
+        padding: 8px 12px;
+      }
+      .container {
+        max-width: 1140px;
+        padding: 0 15px;
+      }
+      .login-form {
+        display: flex;
+        align-items: center;
+      }
+      .login-form .form-group {
+        margin-right: 10px;
+        margin-bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Flask Example</a>
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Flask Example</a>
         </div>
-
         <div class="collapse navbar-collapse" id="myNavbar">
-        <ul class="nav navbar-nav">
+          <ul class="nav navbar-nav">
             <li><a href="{{ url_for('FUN_root') }}">Home</a></li>
             <li><a href="{{ url_for('FUN_public') }}">Public</a></li>
             {% if session.get("current_user", None) != None %}
-	       <li><a href="{{ url_for('FUN_private') }}">Private</a></li>
-	    {% endif%}
+              <li><a href="{{ url_for('FUN_private') }}">Private</a></li>
+            {% endif %}
             {% if session.get("current_user", None) == "ADMIN" %}
-	      <li><a href="{{ url_for('FUN_admin') }}">Admin Dashboard</a></li>
-	    {% endif %}
-        </ul>
-        
-        <ul class="nav navbar-nav navbar-right">
-        {% if session.get("current_user", None) == None %}
-                <form action="/login" method="post" class="navbar-form navbar-right">
-                    <div class="form-group">
-                      <input type="text" name="id" placeholder="User Name" class="form-control">
-                    </div>
-                    <div class="form-group">
-                      <input type="password" name="pw" placeholder="Password" class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-success">Log In</button>
-                </form>
-        {% else %}
-        <li>
-              <a><b>{{ session.get("current_user") }}</b></a></li>
-              <li><a href="{{ url_for('FUN_logout') }}"><b><u>Logout</u></b></a>
-          </li>
-        {% endif %}
-        </ul>
+              <li><a href="{{ url_for('FUN_admin') }}">Admin Dashboard</a></li>
+            {% endif %}
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right">
+            {% if session.get("current_user", None) == None %}
+              <form action="/login" method="post" class="navbar-form navbar-right login-form">
+                <div class="form-group">
+                  <input type="text" name="id" placeholder="User Name" class="form-control">
+                </div>
+                <div class="form-group">
+                  <input type="password" name="pw" placeholder="Password" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-success">Log In</button>
+              </form>
+            {% else %}
+              <li><a><b>{{ session.get("current_user") }}</b></a></li>
+              <li><a href="{{ url_for('FUN_logout') }}"><b>Logout</b></a></li>
+            {% endif %}
+          </ul>
         </div>
-                        
-    </div>
+      </div>
     </nav>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-                {{ message }}
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+              {{ message }}
             </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
+      <div class="page-header">
+        <h1>{% block page_title %}{% endblock %}</h1>
+      </div>
 
-<div class="container">
-  
-  <h1>{% block page_title %}{% endblock %}</h1>
-  
-  <p>{% block body %}{% endblock %}</p>
+      <div class="content">
+        {% block body %}{% endblock %}
+      </div>
+    </div>
 
-</div>
-
-
-<div class='container'>
-<hr>
-Developed by <a href='https://github.com/XD-DENG'>XD-DENG</a>
-<a href="http://flask.pocoo.org/"><img
-   src="{{ url_for('static', filename='img/flask-powered.png') }}"
-   border="0"
-   align="right"
-   alt="Flask powered"
-   title="Flask powered"></a>
-</div>
-
-
-</html>
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-6">
+            Développé par <a href="https://github.com/XD-DENG">XD-DENG</a>
+          </div>
+          <div class="col-md-6 text-right">
+            <a href="http://flask.pocoo.org/">
+              <img src="{{ url_for('static', filename='img/flask-powered.png') }}" alt="Flask powered" title="Flask powered">
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+  </html>
