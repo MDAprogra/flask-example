@@ -151,11 +151,5 @@ def delete_image_from_db(image_uid):
     _conn.commit()
     _conn.close()
 
-
-
-
-
-
-
 if __name__ == "__main__":
     print(list_users())

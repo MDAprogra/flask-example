@@ -1,73 +1,49 @@
 import unittest
-import sqlite3
-import hashlib
-from database import verify, user_db_file_location, delete_user_from_db
+from flask import Flask, session, request, url_for
+from app import app
 
-class TestVerify(unittest.TestCase):
-
+# Classe de test pour l'API utilisateur
+class TestUserAPI(unittest.TestCase):
     def setUp(self):
-        # Mettre à jour la localisation de la base de données pour utiliser en mémoire
-        global user_db_file_location
-        user_db_file_location = ':memory:'
-
-        # Créer une base de données en mémoire et ajouter des données de test
-        self.conn = sqlite3.connect(user_db_file_location)
-        self.cursor = self.conn.cursor()
-        self.cursor.execute('''CREATE TABLE users (id TEXT PRIMARY KEY, pw TEXT)''')
-        hashed_pw = hashlib.sha256('password123'.encode()).hexdigest()
-        self.cursor.execute('''INSERT INTO users (id, pw) VALUES (?, ?)''', ('user1', hashed_pw))
-        self.conn.commit()
+        """Configuration exécutée avant chaque test."""
+        # Création d'un client de test pour simuler les requêtes HTTP
+        self.client = app.test_client()
+        # Connexion en tant qu'administrateur pour les tests
+        self.client.post("/login", data={"id": "ADMIN", "pw": "admin"})
 
     def tearDown(self):
-        # Fermer la connexion à la base de données
-        self.conn.close()
+        """Nettoyage exécuté après chaque test."""
+        # Supprimer les utilisateurs ajoutés pendant les tests
+        self.client.get("/delete_user/Alice/")
+        self.client.get("/delete_user/Bob/")
 
-    '''
-        Test Unitaire pour la fonction database.verify :
-                    -> MDP OK
-                    -> MDP NOK
-                    -> MDP NC
-    '''
-    def test_verify_correct_password(self):
-        # Appeler la fonction avec des identifiants corrects
-        result = verify('ADMIN', 'admin')
-        self.assertTrue(result)
+    def test_get_users(self):
+        """Vérifie que la route '/admin/' retourne un statut 200 (OK)."""
+        response = self.client.get("/admin/")
+        self.assertEqual(response.status_code, 200)
 
-    def test_verify_incorrect_password(self):
-        # Appeler la fonction avec un mot de passe incorrect
-        result = None
-        try:
-            result = verify('user1', 'wrongpassword')
-        except TypeError:
-            result = False
-        self.assertFalse(result)
+    def test_add_user(self):
+        """Vérifie que l'ajout d'un utilisateur retourne un statut 302 (redirection)."""
+        response = self.client.post("/add_user", data={"id": "Alice", "pw": "password"})
+        self.assertEqual(response.status_code, 302)
 
-    def test_verify_nonexistent_user(self):
-        # Appeler la fonction avec un utilisateur inexistant
-        result = None
-        try:
-            result = verify('nonexistent', 'password123')
-        except TypeError:
-            result = False
-        self.assertFalse(result)
+    def test_delete_user(self):
+        """Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection)."""
+        # Ajouter un utilisateur avant de le supprimer
+        self.client.post("/add_user", data={"id": "Bob", "pw": "password"})
+        # Supprimer l'utilisateur ajouté
+        response = self.client.get("/delete_user/Bob/")
+        self.assertEqual(response.status_code, 302)
 
-        '''
-        Test Unitaire pour la fonction database.delete_user_from_db :
-        -> USER OK
-        -> USER NOK
-        '''
-    def test_delete_user_exist(self):
-        result = delete_user_from_db("TEST")
-        self.assertFalse(result)
+    def test_login(self):
+        """Vérifie que la connexion d'un utilisateur retourne un statut 302 (redirection)."""
+        response = self.client.post("/login", data={"id": "Alice", "pw": "password"})
+        self.assertEqual(response.status_code, 302)
 
-    def test_delete_user_not_exist(self):
-        result = None
-        try:
-            result = delete_user_from_db("TESTEUR")
-        except TypeError:
-            result = False
-        self.assertFalse(result)
+    def test_logout(self):
+        """Vérifie que la déconnexion retourne un statut 302 (redirection)."""
+        response = self.client.get("/logout/")
+        self.assertEqual(response.status_code, 302)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

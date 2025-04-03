@@ -7,12 +7,8 @@ from database import read_note_from_db, write_note_into_db, delete_note_from_db,
 from database import image_upload_record, list_images_for_user, match_user_id_with_image_uid, delete_image_from_db
 from werkzeug.utils import secure_filename
 
-
-
 app = Flask(__name__)
 app.config.from_object('config')
-
-
 
 @app.errorhandler(401)
 def FUN_401(error):
@@ -76,11 +72,6 @@ def FUN_admin():
     else:
         return abort(401)
 
-
-
-
-
-
 @app.route("/write_note", methods = ["POST"])
 def FUN_write_note():
     text_to_write = request.form.get("text_note_to_take")
@@ -139,11 +130,6 @@ def FUN_delete_image(image_uid):
         return abort(401)
     return(redirect(url_for("FUN_private")))
 
-
-
-
-
-
 @app.route("/login", methods = ["POST"])
 def FUN_login():
     id_submitted = request.form.get("id").upper()
@@ -195,10 +181,6 @@ def FUN_add_user():
             return(redirect(url_for("FUN_admin")))
     else:
         return abort(401)
-
-
-
-
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
