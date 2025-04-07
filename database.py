@@ -1,10 +1,18 @@
 import sqlite3
 import hashlib
 import datetime
+import os
 
-user_db_file_location = "database_file/users.db"
-note_db_file_location = "database_file/notes.db"
-image_db_file_location = "database_file/images.db"
+# Utilisez une base de données différente pour les tests
+if 'PYTEST_CURRENT_TEST' in os.environ:
+    user_db_file_location = "database_file/test_users.db"
+    note_db_file_location = "database_file/test_notes.db"
+    image_db_file_location = "database_file/test_images.db"
+else:
+    user_db_file_location = "database_file/users.db"
+    note_db_file_location = "database_file/notes.db"
+    image_db_file_location = "database_file/images.db"
+
 
 def list_users():
     _conn = sqlite3.connect(user_db_file_location)
