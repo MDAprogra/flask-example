@@ -22,13 +22,11 @@ test_FUN_delete_user : Vérifie que la suppression d'un utilisateur retourne un 
 test_FUN_add_user : Vérifie que l'ajout d'un utilisateur retourne un statut 200 (OK).
 """
 
-import unittest
 import os
-import datetime
-import hashlib
-from flask import Flask, session
+import unittest
+
 from app import app, allowed_file  # Ensure 'app' module is correctly installed and accessible
-from database import list_images_for_user, read_note_from_db  # Import the necessary functions
+
 
 class TestUserAPI(unittest.TestCase):
     """Test cases for User API endpoints."""
