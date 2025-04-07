@@ -3,8 +3,12 @@ Unit tests for the User API.
 """
 
 import unittest
-from flask import Flask
-from app import app  # Ensure 'app' module is correctly installed and accessible
+import os
+import datetime
+import hashlib
+from flask import Flask, session
+from app import app, allowed_file  # Ensure 'app' module is correctly installed and accessible
+from database import list_images_for_user, read_note_from_db  # Import the necessary functions
 
 class TestUserAPI(unittest.TestCase):
     """Test cases for User API endpoints."""
@@ -15,6 +19,8 @@ class TestUserAPI(unittest.TestCase):
         self.client = app.test_client()
         # Connexion en tant qu'administrateur pour les tests
         self.client.post("/login", data={"id": "ADMIN", "pw": "admin"})
+        with self.client.session_transaction() as sess:
+            sess['current_user'] = 'ADMIN'
 
     def tearDown(self):
         """Nettoyage exécuté après chaque test."""
@@ -81,11 +87,52 @@ class TestUserAPI(unittest.TestCase):
     def test_413_error(self):
         """Vérifie qu'un fichier trop volumineux retourne un statut 413."""
         with open("large_test_file.jpg", "wb") as f:
-            f.seek(1024 * 1024 * 100)  # 100 MB
+            f.seek(1024 * 1024 * 100 - 1)  # 100 MB - 1 byte
             f.write(b"\0")
         with open("large_test_file.jpg", "rb") as img:
             response = self.client.post("/upload_image", data={"file": img})
         self.assertEqual(response.status_code, 413)
+        os.remove("large_test_file.jpg")
+
+    def test_FUN_root(self):
+        """Vérifie que la route '/' retourne un statut 200 (OK)."""
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_FUN_public(self):
+        """Vérifie que la route '/public/' retourne un statut 200 (OK)."""
+        response = self.client.get("/public/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_FUN_private(self):
+        """Vérifie que la route '/private/' retourne un statut 200 (OK) pour un utilisateur connecté."""
+        response = self.client.get("/private/")
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_allowed_file(self):
+        """Vérifie que la fonction 'allowed_file' retourne True pour des fichiers autorisés."""
+        self.assertTrue(allowed_file("test.png"))
+        self.assertTrue(allowed_file("test.jpg"))
+        self.assertTrue(allowed_file("test.jpeg"))
+        self.assertTrue(allowed_file("test.gif"))
+        self.assertFalse(allowed_file("test.txt"))
+        self.assertFalse(allowed_file("test.pdf"))
+
+
+
+    def test_FUN_delete_user(self):
+        """Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection)."""
+        # Ajouter un utilisateur avant de le supprimer
+        self.client.post("/add_user", data={"id": "Charlie", "pw": "password"})
+        # Supprimer l'utilisateur ajouté
+        response = self.client.get("/delete_user/Charlie/")
+        self.assertEqual(response.status_code, 302)
+
+    def test_FUN_add_user(self):
+        """Vérifie que l'ajout d'un utilisateur retourne un statut 200"""
+        response = self.client.post("/add_user", data={"id": "David", "pw": "password"})
+        self.assertEqual(response.status_code, 200)
 
 if __name__ == "__main__":
     unittest.main()
