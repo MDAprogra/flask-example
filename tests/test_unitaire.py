@@ -1,5 +1,25 @@
 """
 Unit tests for the User API.
+
+setUp : Cette méthode est exécutée avant chaque test. Elle crée un client de test pour simuler les requêtes HTTP et se connecte en tant qu'administrateur.
+tearDown : Cette méthode est exécutée après chaque test. Elle nettoie les données en supprimant les utilisateurs ajoutés pendant les tests.
+test_get_users : Vérifie que la route /admin/ retourne un statut 200 (OK).
+test_add_user : Vérifie que l'ajout d'un utilisateur retourne un statut 200 (OK).
+test_delete_user : Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection).
+test_login : Vérifie que la connexion d'un utilisateur retourne un statut 302 (redirection).
+test_logout : Vérifie que la déconnexion retourne un statut 302 (redirection).
+test_write_note : Vérifie que l'écriture d'une note retourne un statut 302 (redirection).
+test_401_error : Vérifie que la route /private/ retourne un statut 401 pour un utilisateur non connecté.
+test_403_error : Vérifie que la suppression de l'utilisateur ADMIN retourne un statut 403.
+test_404_error : Vérifie qu'une route inexistante retourne un statut 404.
+test_405_error : Vérifie qu'une méthode non autorisée retourne un statut 405.
+test_413_error : Vérifie qu'un fichier trop volumineux retourne un statut 413.
+test_FUN_root : Vérifie que la route / retourne un statut 200 (OK).
+test_FUN_public : Vérifie que la route /public/ retourne un statut 200 (OK).
+test_FUN_private : Vérifie que la route /private/ retourne un statut 200 (OK) pour un utilisateur connecté.
+test_allowed_file : Vérifie que la fonction allowed_file retourne True pour des fichiers autorisés et False pour des fichiers non autorisés.
+test_FUN_delete_user : Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection).
+test_FUN_add_user : Vérifie que l'ajout d'un utilisateur retourne un statut 200 (OK).
 """
 
 import unittest
@@ -109,7 +129,6 @@ class TestUserAPI(unittest.TestCase):
         response = self.client.get("/private/")
         self.assertEqual(response.status_code, 200)
 
-
     def test_allowed_file(self):
         """Vérifie que la fonction 'allowed_file' retourne True pour des fichiers autorisés."""
         self.assertTrue(allowed_file("test.png"))
@@ -118,8 +137,6 @@ class TestUserAPI(unittest.TestCase):
         self.assertTrue(allowed_file("test.gif"))
         self.assertFalse(allowed_file("test.txt"))
         self.assertFalse(allowed_file("test.pdf"))
-
-
 
     def test_FUN_delete_user(self):
         """Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection)."""
