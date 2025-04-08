@@ -102,7 +102,15 @@ class TestUserAPI(unittest.TestCase):
         response = self.client.post("/admin/")
         self.assertEqual(response.status_code, 405)
 
-    
+    def test_413_error(self):
+        """Vérifie qu'un fichier trop volumineux retourne un statut 413."""
+        with open("large_test_file.jpg", "wb") as f:
+            f.seek(1024 * 1024 * 100 - 1)  # 100 MB - 1 byte
+            f.write(b"\0")
+        with open("large_test_file.jpg", "rb") as img:
+            response = self.client.post("/upload_image", data={"file": img})
+        self.assertEqual(response.status_code, 413)
+        os.remove("large_test_file.jpg")
 
     def test_fun_root(self):
         """Vérifie que la route '/' retourne un statut 200 (OK)."""
