@@ -14,12 +14,12 @@ test_403_error : Vérifie que la suppression de l'utilisateur ADMIN retourne un 
 test_404_error : Vérifie qu'une route inexistante retourne un statut 404.
 test_405_error : Vérifie qu'une méthode non autorisée retourne un statut 405.
 test_413_error : Vérifie qu'un fichier trop volumineux retourne un statut 413.
-test_FUN_root : Vérifie que la route / retourne un statut 200 (OK).
-test_FUN_public : Vérifie que la route /public/ retourne un statut 200 (OK).
-test_FUN_private : Vérifie que la route /private/ retourne un statut 200 (OK) pour un utilisateur connecté.
+test_fun_root : Vérifie que la route / retourne un statut 200 (OK).
+test_fun_public : Vérifie que la route /public/ retourne un statut 200 (OK).
+test_fun_private : Vérifie que la route /private/ retourne un statut 200 (OK) pour un utilisateur connecté.
 test_allowed_file : Vérifie que la fonction allowed_file retourne True pour des fichiers autorisés et False pour des fichiers non autorisés.
-test_FUN_delete_user : Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection).
-test_FUN_add_user : Vérifie que l'ajout d'un utilisateur retourne un statut 200 (OK).
+test_fun_delete_user : Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection).
+test_fun_add_user : Vérifie que l'ajout d'un utilisateur retourne un statut 200 (OK).
 """
 
 import os
@@ -112,17 +112,17 @@ class TestUserAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 413)
         os.remove("large_test_file.jpg")
 
-    def test_FUN_root(self):
+    def test_fun_root(self):
         """Vérifie que la route '/' retourne un statut 200 (OK)."""
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
-    def test_FUN_public(self):
+    def test_fun_public(self):
         """Vérifie que la route '/public/' retourne un statut 200 (OK)."""
         response = self.client.get("/public/")
         self.assertEqual(response.status_code, 200)
 
-    def test_FUN_private(self):
+    def test_fun_private(self):
         """Vérifie que la route '/private/' retourne un statut 200 (OK) pour un utilisateur connecté."""
         response = self.client.get("/private/")
         self.assertEqual(response.status_code, 200)
@@ -136,7 +136,7 @@ class TestUserAPI(unittest.TestCase):
         self.assertFalse(allowed_file("test.txt"))
         self.assertFalse(allowed_file("test.pdf"))
 
-    def test_FUN_delete_user(self):
+    def test_fun_delete_user(self):
         """Vérifie que la suppression d'un utilisateur retourne un statut 302 (redirection)."""
         # Ajouter un utilisateur avant de le supprimer
         self.client.post("/add_user", data={"id": "Charlie", "pw": "password"})
@@ -144,7 +144,7 @@ class TestUserAPI(unittest.TestCase):
         response = self.client.get("/delete_user/Charlie/")
         self.assertEqual(response.status_code, 302)
 
-    def test_FUN_add_user(self):
+    def test_fun_add_user(self):
         """Vérifie que l'ajout d'un utilisateur retourne un statut 200"""
         response = self.client.post("/add_user", data={"id": "David", "pw": "password"})
         self.assertEqual(response.status_code, 200)

@@ -22,7 +22,7 @@ def list_users():
     result = [x[0] for x in _c.fetchall()]
 
     _conn.close()
-    
+
     return result
 
 def verify(id, pw):
@@ -31,7 +31,7 @@ def verify(id, pw):
 
     _c.execute("SELECT pw FROM users WHERE id = '" + id + "';")
     result = _c.fetchone()[0] == hashlib.sha256(pw.encode()).hexdigest()
-    
+
     _conn.close()
 
     return result
@@ -39,23 +39,23 @@ def verify(id, pw):
 def delete_user_from_db(id):
     _conn = sqlite3.connect(user_db_file_location)
     _c = _conn.cursor()
-    _c.execute("DELETE FROM users WHERE id = ?;", (id,)) # TODO :: ajout de la virgule pour changer le type de la donnée
+    _c.execute("DELETE FROM users WHERE id = ?;", (id,))  # TODO :: ajout de la virgule pour changer le type de la donnée
     _conn.commit()
     _conn.close()
 
     # when we delete a user FROM database USERS, we also need to delete all his or her notes data FROM database NOTES
     _conn = sqlite3.connect(note_db_file_location)
     _c = _conn.cursor()
-    _c.execute("DELETE FROM notes WHERE user = ?;", (id,)) # TODO :: ajout de la virgule pour changer le type de la donnée
+    _c.execute("DELETE FROM notes WHERE user = ?;", (id,))  # TODO :: ajout de la virgule pour changer le type de la donnée
     _conn.commit()
     _conn.close()
 
-    # when we delete a user FROM database USERS, we also need to 
+    # when we delete a user FROM database USERS, we also need to
     # [1] delete all his or her images FROM image pool (done in app.py)
     # [2] delete all his or her images records FROM database IMAGES
     _conn = sqlite3.connect(image_db_file_location)
     _c = _conn.cursor()
-    _c.execute("DELETE FROM images WHERE owner = ?;", (id,)) # TODO :: ajout de la virgule pour changer le type de la donnée
+    _c.execute("DELETE FROM images WHERE owner = ?;", (id,))  # TODO :: ajout de la virgule pour changer le type de la donnée
     _conn.commit()
     _conn.close()
 
@@ -64,7 +64,7 @@ def add_user(id, pw):
     _c = _conn.cursor()
 
     _c.execute("INSERT INTO users values(?, ?)", (id.upper(), hashlib.sha256(pw.encode()).hexdigest()))
-    
+
     _conn.commit()
     _conn.close()
 
@@ -72,7 +72,7 @@ def read_note_from_db(id):
     _conn = sqlite3.connect(note_db_file_location)
     _c = _conn.cursor()
 
-    command = "SELECT note_id, timestamp, note FROM notes WHERE user = '" + id.upper() + "';" 
+    command = "SELECT note_id, timestamp, note FROM notes WHERE user = '" + id.upper() + "';"
     _c.execute(command)
     result = _c.fetchall()
 
@@ -86,7 +86,7 @@ def match_user_id_with_note_id(note_id):
     _conn = sqlite3.connect(note_db_file_location)
     _c = _conn.cursor()
 
-    command = "SELECT user FROM notes WHERE note_id = '" + note_id + "';" 
+    command = "SELECT user FROM notes WHERE note_id = '" + note_id + "';"
     _c.execute(command)
     result = _c.fetchone()[0]
 
@@ -109,7 +109,7 @@ def delete_note_from_db(note_id):
     _conn = sqlite3.connect(note_db_file_location)
     _c = _conn.cursor()
 
-    _c.execute("DELETE FROM notes WHERE note_id = ?;", (note_id,)) # TODO :: ajout de la virgule pour changer le type de la donnée
+    _c.execute("DELETE FROM notes WHERE note_id = ?;", (note_id,))  # TODO :: ajout de la virgule pour changer le type de la donnée
 
     _conn.commit()
     _conn.close()
@@ -141,7 +141,7 @@ def match_user_id_with_image_uid(image_uid):
     _conn = sqlite3.connect(image_db_file_location)
     _c = _conn.cursor()
 
-    command = "SELECT owner FROM images WHERE uid = '" + image_uid + "';" 
+    command = "SELECT owner FROM images WHERE uid = '" + image_uid + "';"
     _c.execute(command)
     result = _c.fetchone()[0]
 
@@ -154,10 +154,7 @@ def delete_image_from_db(image_uid):
     _conn = sqlite3.connect(image_db_file_location)
     _c = _conn.cursor()
 
-    _c.execute("DELETE FROM images WHERE uid = ?;", (image_uid,)) # TODO :: ajout de la virgule pour changer le type de la donnée
+    _c.execute("DELETE FROM images WHERE uid = ?;", (image_uid,))  # TODO :: ajout de la virgule pour changer le type de la donnée
 
     _conn.commit()
     _conn.close()
-
-if __name__ == "__main__":
-    print(list_users())

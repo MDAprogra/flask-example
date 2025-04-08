@@ -3,70 +3,60 @@
 {% block body %}
     {{ super() }}
 
-    <div class="panel panel-primary">
-        <div class="panel-heading">
-            <h3 class="panel-title"><span class="glyphicon glyphicon-lock"></span> Votre espace sécurisé</h3>
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-lock"></i> Votre espace sécurisé
         </div>
-        <div class="panel-body">
+        <div class="card-body">
             <div class="alert alert-info">
-                <span class="glyphicon glyphicon-info-sign"></span>
-                Vous pouvez prendre des notes et télécharger des images ici. Seul vous pouvez y accéder. Tout sera supprimé si votre compte est supprimé.
+                <i class="fas fa-info-circle"></i> Vous pouvez prendre des notes et télécharger des images ici. Seul vous pouvez y accéder. Tout sera supprimé si votre compte est supprimé.
             </div>
         </div>
     </div>
-    
+
     <div class="row">
-        <div class="col-md-6">
-            <!-- Section des notes -->
-            <div class="panel panel-success">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><span class="glyphicon glyphicon-pencil"></span> Prendre une note</h3>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-pencil-alt"></i> Prendre une note
                 </div>
-                <div class="panel-body">
-                    <form action="/write_note" method="post" class="form-horizontal">
-                        <div class="form-group">
-                            <div class="col-sm-12">
-                                <textarea class="form-control" rows="3" name="text_note_to_take" placeholder="Écrivez votre note ici..."></textarea>
-                            </div>
+                <div class="card-body">
+                    <form action="/write_note" method="post" class="form">
+                        <div class="mb-3">
+                            <textarea class="form-control" rows="4" name="text_note_to_take" placeholder="Écrivez votre note ici..."></textarea>
                         </div>
-                        <div class="form-group">
-                            <div class="col-sm-12 text-right">
-                                <button type="submit" class="btn btn-success">
-                                    <span class="glyphicon glyphicon-save"></span> Enregistrer
-                                </button>
-                            </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <!-- Section d'upload -->
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><span class="glyphicon glyphicon-picture"></span> Télécharger une image</h3>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-image"></i> Télécharger une image
                 </div>
-                <div class="panel-body">
-                    <form method="post" action="/upload_image" enctype="multipart/form-data" class="form-horizontal">
-                        <div class="form-group">
-                            <div class="col-sm-12">
-                                <div class="input-group">
-                                    <span class="input-group-btn">
-                                        <span class="btn btn-info btn-file">
-                                            <span class="glyphicon glyphicon-folder-open"></span> Parcourir&hellip; <input type="file" name="file">
-                                        </span>
-                                    </span>
-                                    <input type="text" class="form-control" readonly placeholder="Sélectionnez un fichier...">
-                                </div>
-                            </div>
+                <div class="card-body">
+                    <form method="post" action="/upload_image" enctype="multipart/form-data" class="form" id="uploadImageForm">
+                        <div class="mb-3">
+                            <label for="imageUpload" class="form-label fw-bold">
+                                Choisissez une image à télécharger :
+                            </label>
+                            <input type="file" class="form-control" name="file" id="imageUpload" accept="image/*" aria-describedby="fileHelp" aria-label="Fichier image">
+                            <div id="fileHelp" class="form-text">Formats acceptés : JPG, PNG, GIF (max. 5 Mo).</div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-sm-12 text-right">
-                                <button type="submit" class="btn btn-info">
-                                    <span class="glyphicon glyphicon-upload"></span> Télécharger
-                                </button>
-                            </div>
+                        <div id="imagePreview" class="mb-3" style="display: none;">
+                            <p class="fw-bold">Aperçu :</p>
+                            <img src="" alt="Aperçu de l’image sélectionnée" class="img-fluid rounded border shadow-sm" style="max-height: 200px;">
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-info" title="Télécharger l'image sélectionnée">
+                                <i class="fas fa-upload"></i> Télécharger
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -74,21 +64,20 @@
         </div>
     </div>
 
-    <!-- Liste des notes -->
     {% if notes %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title"><span class="glyphicon glyphicon-list"></span> Vos notes</h3>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-list"></i> Vos notes
         </div>
-        <div class="panel-body p-0">
+        <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th><span class="glyphicon glyphicon-tag"></span> ID</th>
-                            <th><span class="glyphicon glyphicon-time"></span> Date</th>
-                            <th><span class="glyphicon glyphicon-file"></span> Contenu</th>
-                            <th><span class="glyphicon glyphicon-cog"></span> Action</th>
+                            <th><i class="fas fa-tag"></i> ID</th>
+                            <th><i class="fas fa-clock"></i> Date</th>
+                            <th><i class="fas fa-file-alt"></i> Contenu</th>
+                            <th><i class="fas fa-cog"></i> Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -98,8 +87,8 @@
                             <td>{{ timestamp }}</td>
                             <td>{{ note }}</td>
                             <td>
-                                <a href="{{act}}" class="btn btn-danger btn-xs">
-                                    <span class="glyphicon glyphicon-trash"></span> Supprimer
+                                <a href="{{act}}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt"></i> Supprimer
                                 </a>
                             </td>
                         </tr>
@@ -111,21 +100,20 @@
     </div>
     {% endif %}
 
-    <!-- Liste des images -->
     {% if images %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title"><span class="glyphicon glyphicon-camera"></span> Vos images</h3>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-camera"></i> Vos images
         </div>
-        <div class="panel-body p-0">
+        <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th><span class="glyphicon glyphicon-tag"></span> ID</th>
-                            <th><span class="glyphicon glyphicon-time"></span> Date</th>
-                            <th><span class="glyphicon glyphicon-picture"></span> Nom</th>
-                            <th><span class="glyphicon glyphicon-cog"></span> Action</th>
+                            <th><i class="fas fa-tag"></i> ID</th>
+                            <th><i class="fas fa-clock"></i> Date</th>
+                            <th><i class="fas fa-image"></i> Nom</th>
+                            <th><i class="fas fa-cog"></i> Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,8 +123,8 @@
                             <td>{{ timestamp }}</td>
                             <td>{{ image_name }}</td>
                             <td>
-                                <a href="{{act}}" class="btn btn-danger btn-xs">
-                                    <span class="glyphicon glyphicon-trash"></span> Supprimer
+                                <a href="{{act}}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt"></i> Supprimer
                                 </a>
                             </td>
                         </tr>
@@ -148,73 +136,48 @@
     </div>
     {% endif %}
 
-    <style>
-        .panel {
-            border-radius: 3px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .panel-heading {
-            font-weight: 600;
-        }
-        .panel-body.p-0 {
-            padding: 0;
-        }
-        .form-control {
-            border-radius: 3px;
-        }
-        .glyphicon {
-            margin-right: 5px;
-        }
-        .table-responsive {
-            border: none;
-        }
-        .table {
-            margin-bottom: 0;
-        }
-        .btn-file {
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-file input[type=file] {
-            position: absolute;
-            top: 0;
-            right: 0;
-            min-width: 100%;
-            min-height: 100%;
-            font-size: 100px;
-            text-align: right;
-            filter: alpha(opacity=0);
-            opacity: 0;
-            outline: none;
-            background: white;
-            cursor: inherit;
-            display: block;
-        }
-        .table-hover > tbody > tr:hover {
-            background-color: #f5f5f5;
-        }
-        .btn-danger {
-            transition: all 0.2s ease;
-        }
-        .btn-danger:hover {
-            transform: scale(1.05);
-        }
-    </style>
-
     <script>
-        $(document).ready(function() {
-            // Script pour afficher le nom du fichier sélectionné
-            $(document).on('change', '.btn-file :file', function() {
-                var input = $(this);
-                var numFiles = input.get(0).files ? input.get(0).files.length : 1;
-                var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-                input.trigger('fileselect', [numFiles, label]);
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('imageUpload');
+            const filePreview = document.getElementById('imagePreview');
+            const previewImg = filePreview.querySelector('img');
+            const uploadForm = document.getElementById('uploadImageForm');
+
+            fileInput.addEventListener('change', function () {
+                const file = this.files[0];
+
+                if (file) {
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Format de fichier non supporté. Veuillez choisir un fichier JPG, PNG ou GIF.');
+                        this.value = '';
+                        filePreview.style.display = 'none';
+                        return;
+                    }
+
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Fichier trop volumineux. Maximum 5 Mo.');
+                        this.value = '';
+                        filePreview.style.display = 'none';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImg.src = e.target.result;
+                        filePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    filePreview.style.display = 'none';
+                }
             });
 
-            $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
-                var input = $(this).parents('.input-group').find(':text');
-                input.val(label);
+            uploadForm.addEventListener('submit', function (event) {
+                if (fileInput.files.length === 0) {
+                    event.preventDefault();
+                    alert('Veuillez sélectionner une image avant de valider.');
+                }
             });
         });
     </script>
