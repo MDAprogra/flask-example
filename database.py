@@ -7,152 +7,203 @@ import hashlib
 import datetime
 import os
 
+# Utilisez une base de données différente pour les tests
+if 'PYTEST_CURRENT_TEST' in os.environ:
+    USER_DB_FILE_LOCATION = "database_file/test_users.db"
+    NOTE_DB_FILE_LOCATION = "database_file/test_notes.db"
+    IMAGE_DB_FILE_LOCATION = "database_file/test_images.db"
+else:
+    USER_DB_FILE_LOCATION = "database_file/users.db"
+    NOTE_DB_FILE_LOCATION = "database_file/notes.db"
+    IMAGE_DB_FILE_LOCATION = "database_file/images.db"
 
-class Config:
-    """Configuration for database file locations."""
-    if 'PYTEST_CURRENT_TEST' in os.environ:
-        USER_DB_FILE = "database_file/test_users.db"
-        NOTE_DB_FILE = "database_file/test_notes.db"
-        IMAGE_DB_FILE = "database_file/test_images.db"
-    else:
-        USER_DB_FILE = "database_file/users.db"
-        NOTE_DB_FILE = "database_file/notes.db"
-        IMAGE_DB_FILE = "database_file/images.db"
+def list_users():
+    """
+List all users in the database.
+    """
+    _conn = sqlite3.connect(USER_DB_FILE_LOCATION)
+    _c = _conn.cursor()
 
+    _c.execute("SELECT id FROM users;")
+    result = [x[0] for x in _c.fetchall()]
 
-class DatabaseManager:
-    """Manages SQLite database connections and operations."""
+    _conn.close()
 
-    @staticmethod
-    def execute_query(db_file, query, params=(), fetchone=False, fetchall=False):
-        """Execute a query in the specified database."""
-        connection = sqlite3.connect(db_file)
-        cursor = connection.cursor()
+    return result
 
-        cursor.execute(query, params)
-        result = None
-        if fetchone:
-            result = cursor.fetchone()
-        elif fetchall:
-            result = cursor.fetchall()
+def verify(user_id, pw):
+    """
+Verify user credentials.
+    """
+    _conn = sqlite3.connect(USER_DB_FILE_LOCATION)
+    _c = _conn.cursor()
 
-        connection.commit()
-        connection.close()
-        return result
+    _c.execute("SELECT pw FROM users WHERE id = ?;", (user_id,))
+    result = _c.fetchone()[0] == hashlib.sha256(pw.encode()).hexdigest()
 
+    _conn.close()
 
-class UserManager:
-    """Handles user-related database operations."""
+    return result
 
-    @staticmethod
-    def list_users():
-        """List all users."""
-        query = "SELECT id FROM users;"
-        return [x[0] for x in DatabaseManager.execute_query(Config.USER_DB_FILE, query, fetchall=True)]
+def delete_user_from_db(user_id):
+    """
+Delete a user and all associated data from the database.
+    """
+    _conn = sqlite3.connect(USER_DB_FILE_LOCATION)
+    _c = _conn.cursor()
+    _c.execute("DELETE FROM users WHERE id = ?;", (user_id,))
+    _conn.commit()
+    _conn.close()
 
-    @staticmethod
-    def verify(user_id, password):
-        """Verify user credentials."""
-        query = "SELECT pw FROM users WHERE id = ?;"
-        result = DatabaseManager.execute_query(Config.USER_DB_FILE, query, (user_id,), fetchone=True)
-        return result and result[0] == hashlib.sha256(password.encode()).hexdigest()
+    # when we delete a user FROM database USERS, we also need to delete all his or her notes data FROM database NOTES
+    _conn = sqlite3.connect(NOTE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
+    _c.execute("DELETE FROM notes WHERE user = ?;", (user_id,))
+    _conn.commit()
+    _conn.close()
 
-    @staticmethod
-    def add_user(user_id, password):
-        """Add a new user."""
-        query = "INSERT INTO users VALUES (?, ?);"
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        DatabaseManager.execute_query(Config.USER_DB_FILE, query, (user_id.upper(), hashed_password))
+    # when we delete a user FROM database USERS, we also need to
+    # [1] delete all his or her images FROM image pool (done in app.py)
+    # [2] delete all his or her images records FROM database IMAGES
+    _conn = sqlite3.connect(IMAGE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
+    _c.execute("DELETE FROM images WHERE owner = ?;", (user_id,))
+    _conn.commit()
+    _conn.close()
 
-    @staticmethod
-    def delete_user(user_id):
-        """Delete a user and all associated data."""
-        # Delete user from users database
-        user_query = "DELETE FROM users WHERE id = ?;"
-        DatabaseManager.execute_query(Config.USER_DB_FILE, user_query, (user_id,))
+def add_user(user_id, pw):
+    """
+Add a new user to the database.
+    """
+    _conn = sqlite3.connect(USER_DB_FILE_LOCATION)
+    _c = _conn.cursor()
 
-        # Delete user's notes
-        NoteManager.delete_notes_by_user(user_id)
+    _c.execute(
+        "INSERT INTO users values(?, ?)",
+        (user_id.upper(), hashlib.sha256(pw.encode()).hexdigest())
+    )
 
-        # Delete user's images
-        ImageManager.delete_images_by_user(user_id)
+    _conn.commit()
+    _conn.close()
 
+def read_note_from_db(user_id):
+    """
+Read all notes for a specific user from the database.
+    """
+    _conn = sqlite3.connect(NOTE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
 
-class NoteManager:
-    """Handles note-related database operations."""
+    command = "SELECT note_id, timestamp, note FROM notes WHERE user = ?;"
+    _c.execute(command, (user_id.upper(),))
+    result = _c.fetchall()
 
-    @staticmethod
-    def read_notes(user_id):
-        """Read all notes for a user."""
-        query = "SELECT note_id, timestamp, note FROM notes WHERE user = ?;"
-        return DatabaseManager.execute_query(Config.NOTE_DB_FILE, query, (user_id.upper(),), fetchall=True)
+    _conn.commit()
+    _conn.close()
 
-    @staticmethod
-    def write_note(user_id, note_content):
-        """Write a new note."""
-        current_timestamp = str(datetime.datetime.now())
-        note_id = hashlib.sha256((user_id.upper() + current_timestamp).encode()).hexdigest()
-        query = "INSERT INTO notes VALUES (?, ?, ?, ?);"
-        DatabaseManager.execute_query(
-            Config.NOTE_DB_FILE,
-            query,
-            (user_id.upper(), current_timestamp, note_content, note_id)
+    return result
+
+def match_user_id_with_note_id(note_id):
+    """
+Given the note id, confirm if the current user is the owner of the note which is being operated.
+    """
+    _conn = sqlite3.connect(NOTE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
+
+    command = "SELECT user FROM notes WHERE note_id = ?;"
+    _c.execute(command, (note_id,))
+    result = _c.fetchone()[0]
+
+    _conn.commit()
+    _conn.close()
+
+    return result
+
+def write_note_into_db(user_id, note_to_write):
+    """
+Write a new note into the database.
+    """
+    _conn = sqlite3.connect(NOTE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
+
+    current_timestamp = str(datetime.datetime.now())
+    _c.execute(
+        "INSERT INTO notes values(?, ?, ?, ?)",
+        (
+            user_id.upper(),
+            current_timestamp,
+            note_to_write,
+            hashlib.sha256((user_id.upper() + current_timestamp).encode()).hexdigest() # corrected here
         )
+    )
 
-    @staticmethod
-    def delete_note(note_id):
-        """Delete a note."""
-        query = "DELETE FROM notes WHERE note_id = ?;"
-        DatabaseManager.execute_query(Config.NOTE_DB_FILE, query, (note_id,))
+    _conn.commit()
+    _conn.close()
 
-    @staticmethod
-    def delete_notes_by_user(user_id):
-        """Delete all notes for a user."""
-        query = "DELETE FROM notes WHERE user = ?;"
-        DatabaseManager.execute_query(Config.NOTE_DB_FILE, query, (user_id,))
+def delete_note_from_db(note_id):
+    """
+Delete a note from the database.
+    """
+    _conn = sqlite3.connect(NOTE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
 
-    @staticmethod
-    def get_note_owner(note_id):
-        """Get the owner of a note."""
-        query = "SELECT user FROM notes WHERE note_id = ?;"
-        result = DatabaseManager.execute_query(Config.NOTE_DB_FILE, query, (note_id,), fetchone=True)
-        return result[0] if result else None
+    _c.execute("DELETE FROM notes WHERE note_id = ?;", (note_id,))
+    _conn.commit()
+    _conn.close()
 
+def image_upload_record(uid, owner, image_name, timestamp):
+    """
+Record an image upload into the database.
+    """
+    _conn = sqlite3.connect(IMAGE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
 
-class ImageManager:
-    """Handles image-related database operations."""
+    _c.execute(
+        "INSERT INTO images VALUES (?, ?, ?, ?)",
+        (uid, owner, image_name, timestamp)
+    )
 
-    @staticmethod
-    def record_upload(image_uid, owner, image_name, timestamp):
-        """Record an image upload."""
-        query = "INSERT INTO images VALUES (?, ?, ?, ?);"
-        DatabaseManager.execute_query(
-            Config.IMAGE_DB_FILE,
-            query,
-            (image_uid, owner, image_name, timestamp)
-        )
+    _conn.commit()
+    _conn.close()
 
-    @staticmethod
-    def list_images(owner):
-        """List all images for a user."""
-        query = "SELECT uid, timestamp, name FROM images WHERE owner = ?;"
-        return DatabaseManager.execute_query(Config.IMAGE_DB_FILE, query, (owner,), fetchall=True)
+def list_images_for_user(owner):
+    """
+List all images for a specific user from the database.
+    """
+    _conn = sqlite3.connect(IMAGE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
 
-    @staticmethod
-    def delete_image(image_uid):
-        """Delete an image."""
-        query = "DELETE FROM images WHERE uid = ?;"
-        DatabaseManager.execute_query(Config.IMAGE_DB_FILE, query, (image_uid,))
+    command = "SELECT uid, timestamp, name FROM images WHERE owner = ?"
+    _c.execute(command, (owner,))
+    result = _c.fetchall()
 
-    @staticmethod
-    def delete_images_by_user(owner):
-        """Delete all images for a user."""
-        query = "DELETE FROM images WHERE owner = ?;"
-        DatabaseManager.execute_query(Config.IMAGE_DB_FILE, query, (owner,))
+    _conn.commit()
+    _conn.close()
 
-    @staticmethod
-    def get_image_owner(image_uid):
-        """Get the owner of an image."""
-        query = "SELECT owner FROM images WHERE uid = ?;"
-        result = DatabaseManager.execute_query(Config.IMAGE_DB_FILE, query, (image_uid,), fetchone=True)
-        return result[0] if result else None
+    return result
+
+def match_user_id_with_image_uid(image_uid):
+    """
+Given the image id, confirm if the current user is the owner of the image which is being operated.
+    """
+    _conn = sqlite3.connect(IMAGE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
+
+    command = "SELECT owner FROM images WHERE uid = ?;"
+    _c.execute(command, (image_uid,))
+    result = _c.fetchone()[0]
+
+    _conn.commit()
+    _conn.close()
+
+    return result
+
+def delete_image_from_db(image_uid):
+    """
+Delete an image from the database.
+    """
+    _conn = sqlite3.connect(IMAGE_DB_FILE_LOCATION)
+    _c = _conn.cursor()
+
+    _c.execute("DELETE FROM images WHERE uid = ?;", (image_uid,))
+    _conn.commit()
+    _conn.close()
